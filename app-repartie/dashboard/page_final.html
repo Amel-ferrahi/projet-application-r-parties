@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Innov3D e Global Ops Cockpit</title>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root {
+            --bg0: #070A12;
+            --bg1: #0B1020;
+            --card: #0F1733cc;
+            --card2: #0E1530;
+            --text: #EAF0FF;
+            --muted: #A9B6D6;
+            --muted2: #7E8CB2;
+            --line: #22305A;
+            --line2: #1B274C;
+            --ok: #33E3A5;
+            --warn: #FFCC66;
+            --bad: #FF5C7A;
+            --info: #63A7FF;
+            --shadow: 0 18px 60px rgba(0,0,0,.55);
+            --shadow2: 0 8px 26px rgba(0,0,0,.35);
+            --r: 18px;
+            --r2: 26px;
+            --pad: 18px;
+            --pad2: 22px;
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        html, body {
+            height: 100%
+        }
+
+        body {
+            margin: 0;
+            font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji","Segoe UI Emoji";
+            color: var(--text);
+            background: radial-gradient(1200px 650px at 15% 10%, #1a2b78 0%, rgba(26,43,120,0) 62%), radial-gradient(1000px 700px at 85% 15%, #7a1a64 0%, rgba(122,26,100,0) 62%), radial-gradient(900px 700px at 40% 100%, #0f7a65 0%, rgba(15,122,101,0) 55%), linear-gradient(180deg, var(--bg0), var(--bg1));
+            overflow-x: hidden;
+        }
+
+        /* subtle animated grain */
+        .grain {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            opacity: .13;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='260' height='260' filter='url(%23n)' opacity='.45'/%3E%3C/svg%3E");
+            mix-blend-mode: overlay;
+            animation: drift 10s linear infinite;
+        }
+
+        @keyframes drift {
+            from {
+                transform: translate3d(0,0,0)
+            }
+
+            to {
+                transform: translate3d(-40px,30px,0)
+            }
+        }
+
+        .app {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 22px 18px 70px;
+        }
+
+        header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 14px;
+            padding: 10px 4px 18px;
+        }
+
+        .brand {
+            display: flex;
+            gap: 14px;
+            align-items: center;
+        }
+
+        .logo {
+            width: 46px;
+            height: 46px;
+            border-radius: 14px;
+            background: radial-gradient(14px 14px at 28% 30%, rgba(255,255,255,.9) 0%, rgba(255,255,255,0) 70%), conic-gradient(from 210deg, #63A7FF, #33E3A5, #FFCC66, #FF5C7A, #63A7FF);
+            box-shadow: 0 12px 30px rgba(0,0,0,.35);
+            position: relative;
+        }
+
+            .logo:after {
+                content: "";
+                position: absolute;
+                inset: 8px;
+                border-radius: 10px;
+                background: linear-gradient(180deg, rgba(15,23,51,.65), rgba(15,23,51,.95));
+                border: 1px solid rgba(255,255,255,.08);
+            }
+
+        .title h1 {
+            margin: 0;
+            font-size: 18px;
+            letter-spacing: .2px;
+        }
+
+        .title p {
+            margin: 4px 0 0;
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.35;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            justify-content: flex-end;
+        }
+
+        .pill {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            padding: 10px 12px;
+            border-radius: 999px;
+            background: rgba(15,23,51,.55);
+            border: 1px solid rgba(255,255,255,.10);
+            box-shadow: var(--shadow2);
+            backdrop-filter: blur(10px);
+        }
+
+            .pill label {
+                color: var(--muted);
+                font-size: 12px
+            }
+
+        select, button, input {
+            font: inherit;
+            color: var(--text);
+            background: rgba(8,12,26,.6);
+            border: 1px solid rgba(255,255,255,.10);
+            border-radius: 12px;
+            padding: 9px 10px;
+            outline: none;
+            transition: .18s ease;
+        }
+
+            select:hover, button:hover, input:hover {
+                border-color: rgba(255,255,255,.20)
+            }
+
+            select:focus, button:focus, input:focus {
+                border-color: rgba(99,167,255,.65);
+                box-shadow: 0 0 0 4px rgba(99,167,255,.18)
+            }
+
+        button {
+            cursor: pointer;
+            background: linear-gradient(180deg, rgba(99,167,255,.22), rgba(99,167,255,.10));
+        }
+
+            button.primary {
+                background: linear-gradient(180deg, rgba(51,227,165,.24), rgba(51,227,165,.10));
+                border-color: rgba(51,227,165,.35);
+            }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1.2fr .8fr;
+            gap: 14px;
+            margin-top: 8px;
+        }
+
+        @media (max-width: 980px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .controls {
+                justify-content: flex-start;
+            }
+        }
+
+        .card {
+            background: linear-gradient(180deg, rgba(15,23,51,.62), rgba(10,14,32,.62));
+            border: 1px solid rgba(255,255,255,.10);
+            border-radius: var(--r2);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            position: relative;
+            backdrop-filter: blur(10px);
+        }
+
+            .card::before {
+                content: "";
+                position: absolute;
+                inset: 0;
+                background: radial-gradient(1000px 300px at 15% 0%, rgba(99,167,255,.18), transparent 45%), radial-gradient(900px 260px at 85% 0%, rgba(255,92,122,.14), transparent 45%);
+                pointer-events: none;
+            }
+
+        .cardHeader {
+            position: relative;
+            padding: 18px 18px 10px;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+            .cardHeader h2 {
+                margin: 0;
+                font-size: 15px;
+                letter-spacing: .2px;
+            }
+
+            .cardHeader .subtitle {
+                margin-top: 6px;
+                color: var(--muted);
+                font-size: 12.5px;
+                line-height: 1.35;
+            }
+
+        .cardBody {
+            position: relative;
+            padding: 8px 18px 18px;
+        }
+
+        .kpiRow {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        @media (max-width: 980px) {
+            .kpiRow {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .kpi {
+            background: rgba(8,12,26,.55);
+            border: 1px solid rgba(255,255,255,.10);
+            border-radius: var(--r);
+            padding: 14px 14px;
+            box-shadow: var(--shadow2);
+            min-height: 86px;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .kpi:before {
+                content: "";
+                position: absolute;
+                inset: -40px -40px auto auto;
+                width: 120px;
+                height: 120px;
+                background: radial-gradient(circle, rgba(99,167,255,.25), transparent 60%);
+                transform: rotate(12deg);
+            }
+
+            .kpi .label {
+                color: var(--muted);
+                font-size: 12px;
+            }
+
+            .kpi .value {
+                font-size: 22px;
+                margin-top: 6px;
+                font-weight: 750;
+                letter-spacing: .2px;
+            }
+
+            .kpi .caption {
+                margin-top: 6px;
+                color: var(--muted2);
+                font-size: 12px;
+                line-height: 1.2;
+            }
+
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(255,255,255,.10);
+            background: rgba(8,12,26,.55);
+            color: var(--muted);
+            font-size: 12px;
+            white-space: nowrap;
+        }
+
+        .dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 99px;
+            background: var(--info)
+        }
+
+            .dot.ok {
+                background: var(--ok)
+            }
+
+            .dot.bad {
+                background: var(--bad)
+            }
+
+            .dot.warn {
+                background: var(--warn)
+            }
+
+        .tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 0 18px 14px;
+            position: relative;
+        }
+
+        .tab {
+            padding: 9px 12px;
+            border-radius: 999px;
+            background: rgba(8,12,26,.40);
+            border: 1px solid rgba(255,255,255,.10);
+            color: var(--muted);
+            cursor: pointer;
+            user-select: none;
+            transition: .18s ease;
+            font-size: 12.5px;
+        }
+
+            .tab.active {
+                color: var(--text);
+                border-color: rgba(99,167,255,.55);
+                background: rgba(99,167,255,.12);
+                box-shadow: 0 0 0 4px rgba(99,167,255,.10);
+            }
+
+        .twoCol {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        @media (max-width: 980px) {
+            .twoCol {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .chartWrap {
+            background: rgba(8,12,26,.55);
+            border: 1px solid rgba(255,255,255,.10);
+            border-radius: var(--r2);
+            padding: 14px;
+            box-shadow: var(--shadow2);
+            min-height: 260px;
+        }
+
+        .chartTitle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+            .chartTitle h3 {
+                margin: 0;
+                font-size: 13px;
+                color: var(--text);
+            }
+
+            .chartTitle p {
+                margin: 0;
+                font-size: 12px;
+                color: var(--muted);
+            }
+
+        .tableWrap {
+            background: rgba(8,12,26,.55);
+            border: 1px solid rgba(255,255,255,.10);
+            border-radius: var(--r2);
+            padding: 12px;
+            box-shadow: var(--shadow2);
+            overflow: auto;
+            max-height: 380px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12.5px;
+        }
+
+        th, td {
+            padding: 10px 10px;
+            border-bottom: 1px solid rgba(255,255,255,.08);
+            text-align: left;
+            vertical-align: top;
+        }
+
+        th {
+            color: var(--muted);
+            font-weight: 650;
+            position: sticky;
+            top: 0;
+            background: rgba(10,14,32,.85);
+            backdrop-filter: blur(10px);
+        }
+
+        tr:hover td {
+            background: rgba(99,167,255,.06);
+        }
+
+        .footer {
+            margin-top: 16px;
+            color: var(--muted2);
+            font-size: 12px;
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            flex-wrap: wrap;
+            padding: 0 6px;
+        }
+
+        .toast {
+            position: fixed;
+            right: 18px;
+            bottom: 18px;
+            background: rgba(8,12,26,.78);
+            border: 1px solid rgba(255,255,255,.12);
+            border-radius: 16px;
+            padding: 12px 14px;
+            box-shadow: var(--shadow);
+            color: var(--text);
+            max-width: 420px;
+            transform: translateY(16px);
+            opacity: 0;
+            pointer-events: none;
+            transition: .22s ease;
+            backdrop-filter: blur(10px);
+        }
+
+            .toast.show {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+            .toast .t {
+                font-weight: 750;
+                font-size: 13px;
+                margin: 0 0 4px;
+            }
+
+            .toast .m {
+                margin: 0;
+                color: var(--muted);
+                font-size: 12.5px;
+                line-height: 1.35;
+            }
+
+        .mono {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="grain"></div>
+    <div class="app">
+        <header>
+            <div class="brand">
+                <div class="logo" aria-hidden="true"></div>
+                <div class="title">
+                    <h1>Innov3D e Global Ops Cockpit</h1>
+                    <p>Une page. Tous les sites. Tous les metiers. <span class="mono">DG e Finance e IT e Data</span></p>
+                </div>
+            </div>
+
+            <div class="controls">
+                <div class="pill">
+                    <label for="role">Vue</label>
+                    <select id="role">
+                        <option value="DG" selected>Direction Generale</option>
+                        <option value="FIN">Finance & Contrele</option>
+                        <option value="IT">Informatique</option>
+                        <option value="ALL">Tout (full cockpit)</option>
+                    </select>
+                </div>
+
+                <div class="pill">
+                    <label for="refresh">Auto-refresh</label>
+                    <select id="refresh">
+                        <option value="0" selected>Off</option>
+                        <option value="5">5s</option>
+                        <option value="10">10s</option>
+                        <option value="30">30s</option>
+                    </select>
+                </div>
+
+                <div class="pill">
+                    <label for="filterSite">Sites</label>
+                    <select id="filterSite">
+                        <option value="all" selected>Tous</option>
+                        <option value="http://localhost:3001">egypte (3001)</option>
+                        <option value="http://localhost:3002">France (3002)</option>
+                        <option value="http://localhost:3003">Vietnam (3003)</option>
+                    </select>
+                </div>
+
+                <button class="primary" id="btnReload">Recharger</button>
+            </div>
+        </header>
+
+        <div class="grid">
+            <!-- LEFT: KPI + CHARTS -->
+            <section class="card" id="panelMain">
+                <div class="cardHeader">
+                    <div>
+                        <h2 id="panelTitle">Resume Direction Generale</h2>
+                        <div class="subtitle" id="panelSubtitle">KPIs consolides multi-sites + graphiques.</div>
+                    </div>
+                    <div class="chip"><span class="dot ok" id="dotStatus"></span><span id="statusText">Systemes OK</span></div>
+                </div>
+
+                <div class="cardBody">
+                    <div class="kpiRow">
+                        <div class="kpi">
+                            <div class="label">Employes (total)</div>
+                            <div class="value" id="kpiEmployees">e</div>
+                            <div class="caption">DG e agregation inter-sites</div>
+                        </div>
+                        <div class="kpi">
+                            <div class="label">Achats (total e)</div>
+                            <div class="value" id="kpiPurchases">e</div>
+                            <div class="caption">DG e somme des achats</div>
+                        </div>
+                        <div class="kpi">
+                            <div class="label">Resp. + km (id)</div>
+                            <div class="value" id="kpiTopKm">e</div>
+                            <div class="caption">Finance e multi-sites</div>
+                        </div>
+                        <div class="kpi">
+                            <div class="label">Drone le + ancien</div>
+                            <div class="value" id="kpiOldDrone">e</div>
+                            <div class="caption">Finance e via Surveillance</div>
+                        </div>
+                    </div>
+
+                    <div style="height:14px"></div>
+
+                    <div class="twoCol">
+                        <div class="chartWrap">
+                            <div class="chartTitle">
+                                <div>
+                                    <h3>Achats par site</h3>
+                                    <p>Bar chart (DG)</p>
+                                </div>
+                                <span class="chip"><span class="dot"></span><span id="capAchats">e</span></span>
+                            </div>
+                            <canvas id="chartAchats"></canvas>
+                        </div>
+
+                        <div class="chartWrap">
+                            <div class="chartTitle">
+                                <div>
+                                    <h3>Repartition des employes</h3>
+                                    <p>Pie/Doughnut (Data)</p>
+                                </div>
+                                <span class="chip"><span class="dot warn"></span><span id="capPeople">e</span></span>
+                            </div>
+                            <canvas id="chartEmployees"></canvas>
+                        </div>
+                    </div>
+
+                    <div style="height:12px"></div>
+
+                    <div class="twoCol">
+                        <div class="chartWrap">
+                            <div class="chartTitle">
+                                <div>
+                                    <h3>Kilometres cumules par responsable</h3>
+                                    <p>Line (Data)</p>
+                                </div>
+                                <span class="chip"><span class="dot ok"></span><span id="capKm">e</span></span>
+                            </div>
+                            <canvas id="chartKm"></canvas>
+                        </div>
+
+                        <div class="chartWrap">
+                            <div class="chartTitle">
+                                <div>
+                                    <h3>Formations IT e engagement</h3>
+                                    <p>Bar (Data)</p>
+                                </div>
+                                <span class="chip"><span class="dot"></span><span id="capTrain">e</span></span>
+                            </div>
+                            <canvas id="chartTrain"></canvas>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- RIGHT: DETAILS / DATA EXPLORER -->
+            <aside class="card" id="panelSide">
+                <div class="cardHeader">
+                    <div>
+                        <h2>Data Explorer</h2>
+                        <div class="subtitle">Toutes les donnees brutes + recherche instantanee.</div>
+                    </div>
+                    <div class="chip"><span class="dot" id="dotFetch"></span><span id="fetchText">Pret</span></div>
+                </div>
+
+                <div class="tabs">
+                    <div class="tab active" data-tab="summary">Resume</div>
+                    <div class="tab" data-tab="personnel">Personnel</div>
+                    <div class="tab" data-tab="operations">Operations</div>
+                    <div class="tab" data-tab="formations">Formations</div>
+                    <div class="tab" data-tab="releves">Releves</div>
+                    <div class="tab" data-tab="articles">Articles</div>
+                    <div class="tab" data-tab="surveillance">Surveillance</div>
+                </div>
+
+                <div class="cardBody">
+                    <div class="pill" style="margin-bottom:12px; justify-content:space-between; width:100%;">
+                        <label for="q">Recherche</label>
+                        <input id="q" placeholder="ex: informatique, Achat, EGY001, zone 301e" style="min-width:220px; flex:1; margin-left:10px;" />
+                    </div>
+
+                    <div id="tabContent">
+                        <!-- injected -->
+                    </div>
+                </div>
+            </aside>
+        </div>
+
+        <div class="footer">
+            <div> Tips demo : change la <b>Vue</b>, filtre <b>Sites</b>, puis eRechargere.</div>
+            <div class="mono" id="footMeta">e</div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast">
+        <p class="t" id="toastT">Info</p>
+        <p class="m" id="toastM">e</p>
+    </div>
+
+    <script>
+        // ====== CONFIG ======
+        const DATA_SITES = [
+            "http://localhost:3001",
+            "http://localhost:3002",
+            "http://localhost:3003"
+        ];
+        const BUSINESS = {
+            DG: "http://localhost:4000",
+            FIN: "http://localhost:5000",
+            IT: "http://localhost:6000"
+        };
+
+        // ====== STATE ======
+        const state = {
+            role: "DG",
+            filterSite: "all",
+            q: "",
+            raw: {
+                personnel: [],
+                operations: [],
+                formations: [],
+                releves: [],
+                articles: [],
+                surveillance: []
+            },
+            dg: null,
+            dgAchats: null,
+            finTopKm: null,
+            finOldDrone: null,
+            itMinTrain: null,
+            itNoIT: null,
+            lastUpdated: null,
+            timers: { auto: null },
+            charts: {}
+        };
+
+        // ====== HELPERS ======
+        const $ = (id) => document.getElementById(id);
+
+        function toast(title, msg) {
+            $("toastT").textContent = title;
+            $("toastM").textContent = msg;
+            const t = $("toast");
+            t.classList.add("show");
+            setTimeout(() => t.classList.remove("show"), 2600);
+        }
+
+        async function safeFetch(url) {
+            const r = await fetch(url);
+            if (!r.ok) throw new Error(`HTTP ${r.status} sur ${url}`);
+            return r.json();
+        }
+
+        function fmtInt(n) {
+            if (n === null || n === undefined || Number.isNaN(Number(n))) return "e";
+            return Number(n).toLocaleString("fr-FR");
+        }
+        function fmtEUR(n) {
+            if (n === null || n === undefined || Number.isNaN(Number(n))) return "e";
+            return Number(n).toLocaleString("fr-FR", { maximumFractionDigits: 0 }) + " e";
+        }
+
+        function setStatus(ok, msg) {
+            $("dotStatus").className = "dot " + (ok ? "ok" : "bad");
+            $("statusText").textContent = msg;
+        }
+        function setFetchStatus(mode, msg) {
+            $("dotFetch").className = "dot " + (mode === "ok" ? "ok" : mode === "warn" ? "warn" : mode === "bad" ? "bad" : "");
+            $("fetchText").textContent = msg;
+        }
+
+        function sitePass(site) {
+            return state.filterSite === "all" || state.filterSite === site;
+        }
+
+        function normalizeRecord(type, site, obj) {
+            return { __type: type, __site: site, ...obj };
+        }
+
+        function filterQuery(items) {
+            const q = (state.q || "").trim().toLowerCase();
+            if (!q) return items;
+            return items.filter(it => JSON.stringify(it).toLowerCase().includes(q));
+        }
+
+        function uniq(arr) { return [...new Set(arr)]; }
+
+        // ====== DATA LOAD ======
+        async function loadBusiness() {
+            const tasks = [];
+            // DG
+            tasks.push(
+                safeFetch(`${BUSINESS.DG}/dg/dashboard`).then(d => state.dg = d).catch(() => state.dg = null)
+            );
+            tasks.push(
+                safeFetch(`${BUSINESS.DG}/dg/achats-par-site`).then(d => state.dgAchats = d).catch(() => state.dgAchats = null)
+            );
+            // FIN
+            tasks.push(
+                safeFetch(`${BUSINESS.FIN}/finance/responsable-plus-km`).then(d => state.finTopKm = d).catch(() => state.finTopKm = null)
+            );
+            tasks.push(
+                safeFetch(`${BUSINESS.FIN}/finance/drone-plus-ancien`).then(d => state.finOldDrone = d).catch(() => state.finOldDrone = null)
+            );
+            // IT
+            tasks.push(
+                safeFetch(`${BUSINESS.IT}/it/formation-motivation-min`).then(d => state.itMinTrain = d).catch(() => state.itMinTrain = null)
+            );
+            tasks.push(
+                safeFetch(`${BUSINESS.IT}/it/sites-sans-personnel-it`).then(d => state.itNoIT = d).catch(() => state.itNoIT = null)
+            );
+
+            await Promise.allSettled(tasks);
+        }
+
+        async function loadRaw() {
+            state.raw = { personnel: [], operations: [], formations: [], releves: [], articles: [], surveillance: [] };
+
+            const jobs = [];
+            for (const site of DATA_SITES) {
+                // Personnel
+                jobs.push(safeFetch(`${site}/personnel`)
+                    .then(list => list.forEach(x => state.raw.personnel.push(normalizeRecord("personnel", site, x))))
+                    .catch(() => { }));
+                // Operations
+                jobs.push(safeFetch(`${site}/operations`)
+                    .then(list => list.forEach(x => state.raw.operations.push(normalizeRecord("operations", site, x))))
+                    .catch(() => { }));
+                // Formations
+                jobs.push(safeFetch(`${site}/formations`)
+                    .then(list => list.forEach(x => state.raw.formations.push(normalizeRecord("formations", site, x))))
+                    .catch(() => { }));
+                // Releves (egypte + France si dispo)
+                jobs.push(safeFetch(`${site}/releves`)
+                    .then(list => list.forEach(x => state.raw.releves.push(normalizeRecord("releves", site, x))))
+                    .catch(() => { }));
+                // Articles (egypte)
+                jobs.push(safeFetch(`${site}/articles`)
+                    .then(list => list.forEach(x => state.raw.articles.push(normalizeRecord("articles", site, x))))
+                    .catch(() => { }));
+                // Surveillance (Vietnam + eventuellement deautres)
+                jobs.push(safeFetch(`${site}/surveillance`)
+                    .then(list => list.forEach(x => state.raw.surveillance.push(normalizeRecord("surveillance", site, x))))
+                    .catch(() => { }));
+            }
+            await Promise.allSettled(jobs);
+        }
+
+        async function reloadAll() {
+            setFetchStatus("warn", "Chargemente");
+            try {
+                await loadBusiness();
+                await loadRaw();
+                state.lastUpdated = new Date();
+                renderAll();
+                setFetchStatus("ok", "e jour");
+                setStatus(true, "Systemes OK");
+                toast(" Mise e jour", "Donnees consolidees + charts rafraechis.");
+            } catch (e) {
+                console.error(e);
+                setFetchStatus("bad", "Erreur");
+                setStatus(false, "Probleme de recuperation");
+                toast(" Erreur", e.message);
+            }
+        }
+
+        // ====== RENDER ======
+        function setRoleUI() {
+            const role = state.role;
+            const map = {
+                DG: { t: "Resume Direction Generale", s: "KPIs consolides multi-sites + graphiques." },
+                FIN: { t: "Resume Finance & Contrele", s: "Kilometres e drones e performance commerciale." },
+                IT: { t: "Resume Informatique", s: "Formations IT e couverture du service IT." },
+                ALL: { t: "Global Ops Cockpit", s: "Vue totale : DG + Finance + IT + data brut." },
+            };
+            $("panelTitle").textContent = map[role].t;
+            $("panelSubtitle").textContent = map[role].s;
+
+            // basic visibility rules
+            const showAll = (role === "ALL");
+            // we keep everything visible but we can dim captions
+            // (simple & safe)
+        }
+
+        function updateKPIs() {
+            // DG KPIs
+            const dg = state.dg;
+            $("kpiEmployees").textContent = dg ? fmtInt(dg.totalEmployes) : "e";
+            $("kpiPurchases").textContent = dg ? fmtEUR(dg.totalAchats) : "e";
+
+            // Finance KPI
+            const f = state.finTopKm;
+            $("kpiTopKm").textContent = (f && f.responsable) ? f.responsable : "e";
+
+            const d = state.finOldDrone;
+            $("kpiOldDrone").textContent = (d && (d.droneId || d.premiereMiseEnService))
+                ? `${d.droneId || "Drone"}`
+                : "e";
+
+            $("capAchats").textContent = dg && dg.sitesPrisEnCompte ? `${dg.sitesPrisEnCompte.length} site(s)` : "e";
+            $("capPeople").textContent = `${fmtInt(state.raw.personnel.length)} entrees`;
+            $("capKm").textContent = `${fmtInt(state.raw.operations.length)} operations`;
+            $("capTrain").textContent = `${fmtInt(state.raw.formations.length)} formations`;
+            $("footMeta").textContent = state.lastUpdated
+                ? `Derniere MAJ: ${state.lastUpdated.toLocaleString("fr-FR")}`
+                : "e";
+        }
+
+        function destroyChart(id) {
+            if (state.charts[id]) {
+                state.charts[id].destroy();
+                state.charts[id] = null;
+            }
+        }
+
+        function buildCharts() {
+            // Filter by site
+            const people = state.raw.personnel.filter(x => sitePass(x.__site));
+            const ops = state.raw.operations.filter(x => sitePass(x.__site));
+            const trains = state.raw.formations.filter(x => sitePass(x.__site));
+
+            // --- Chart 1: Achats par site (business)
+            destroyChart("chartAchats");
+            const achats = state.dgAchats || [];
+            const achatsFiltered = (state.filterSite === "all") ? achats : achats.filter(a => a.site === state.filterSite);
+            state.charts.chartAchats = new Chart($("chartAchats"), {
+                type: "bar",
+                data: {
+                    labels: achatsFiltered.map(x => x.site.replace("http://localhost:", "Site ")),
+                    datasets: [{ label: "Achats (e)", data: achatsFiltered.map(x => x.total) }]
+                },
+                options: {
+                    plugins: { legend: { display: false } },
+                    scales: { y: { ticks: { callback: v => v + "e" } } }
+                }
+            });
+
+            // --- Chart 2: Employes par site (doughnut)
+            destroyChart("chartEmployees");
+            const bySite = {};
+            for (const p of people) {
+                bySite[p.__site] = (bySite[p.__site] || 0) + 1;
+            }
+            const labels2 = Object.keys(bySite).map(s => s.replace("http://localhost:", "Site "));
+            const values2 = Object.values(bySite);
+            state.charts.chartEmployees = new Chart($("chartEmployees"), {
+                type: "doughnut",
+                data: { labels: labels2, datasets: [{ label: "Employes", data: values2 }] },
+                options: { plugins: { legend: { position: "bottom" } } }
+            });
+
+            // --- Chart 3: Km cumules par responsable (line)
+            destroyChart("chartKm");
+            const kmByResp = {};
+            for (const o of ops) {
+                const r = o.responsable || "inconnu";
+                const km = Number(o.kilometres || 0);
+                kmByResp[r] = (kmByResp[r] || 0) + km;
+            }
+            const resp = Object.keys(kmByResp).sort((a, b) => kmByResp[b] - kmByResp[a]).slice(0, 8);
+            state.charts.chartKm = new Chart($("chartKm"), {
+                type: "line",
+                data: {
+                    labels: resp,
+                    datasets: [{ label: "Km cumules", data: resp.map(r => kmByResp[r]) }]
+                },
+                options: { plugins: { legend: { display: false } } }
+            });
+
+            // --- Chart 4: Formations IT engagement (bar)
+            destroyChart("chartTrain");
+            const itTr = trains.filter(f => (f.sujet || "").toLowerCase().includes("informatique"));
+            const topTr = itTr.slice(0, 10);
+            state.charts.chartTrain = new Chart($("chartTrain"), {
+                type: "bar",
+                data: {
+                    labels: topTr.map(f => (f.nomFormation || f.intitule || f.id || "Formation")),
+                    datasets: [{ label: "Engagement (%)", data: topTr.map(f => Number(f.engagement ?? f.motivation ?? 0)) }]
+                },
+                options: { plugins: { legend: { display: false } }, scales: { y: { min: 0, max: 100 } } }
+            });
+        }
+
+        function renderTable(items) {
+            const keys = uniq(items.flatMap(o => Object.keys(o))).filter(k => !k.startsWith("__"));
+            const headers = ["site", ...keys];
+
+            const rows = filterQuery(items).slice(0, 200); // keep UI snappy
+
+            const thead = `<thead><tr>${headers.map(h => `<th>${h}</th>`).join("")}</tr></thead>`;
+            const tbody = `<tbody>${rows.map(r => `<tr>${headers.map(h => {
+                const v = (h === "site") ? r.__site : r[h];
+                return `<td>${(v === undefined || v === null) ? "" : String(v)}</td>`;
+            }).join("")
+                }</tr>`).join("")
+                }</tbody>`;
+
+            return `
+            <div class="tableWrap">
+              <table>
+                ${thead}
+                ${tbody}
+              </table>
+            </div>
+            <div style="margin-top:10px; color:var(--muted2); font-size:12px;">
+              <span class="mono">${rows.length}</span> lignes affichees (max 200). Utilise la recherche pour filtrer.
+            </div>
+          `;
+        }
+
+        function renderSummary() {
+            const p = state.raw.personnel.filter(x => sitePass(x.__site));
+            const o = state.raw.operations.filter(x => sitePass(x.__site));
+            const f = state.raw.formations.filter(x => sitePass(x.__site));
+            const r = state.raw.releves.filter(x => sitePass(x.__site));
+            const a = state.raw.articles.filter(x => sitePass(x.__site));
+            const s = state.raw.surveillance.filter(x => sitePass(x.__site));
+
+            const itMin = state.itMinTrain;
+            const itNo = state.itNoIT;
+
+            return `
+            <div class="kpi" style="margin-bottom:12px">
+              <div class="label">Captions (preuve niveau 3)</div>
+              <div class="caption" style="margin-top:10px">
+                e Sites charges: <span class="mono">${DATA_SITES.length}</span> e Filtre: <span class="mono">${state.filterSite}</span><br/>
+                e Personnel: <span class="mono">${p.length}</span> e Ops: <span class="mono">${o.length}</span> e Formations: <span class="mono">${f.length}</span><br/>
+                e Releves: <span class="mono">${r.length}</span> e Articles: <span class="mono">${a.length}</span> e Surveillance: <span class="mono">${s.length}</span>
+              </div>
+            </div>
+
+            <div class="kpi" style="margin-bottom:12px">
+              <div class="label">Informatique (metier)</div>
+              <div class="caption" style="margin-top:10px">
+                e Formation IT (engagement min): <span class="mono">${itMin && (itMin.nomFormation || itMin.intitule) ? (itMin.nomFormation || itMin.intitule) : "e"
+                }</span><br/>
+                e Sites sans personnel IT: <span class="mono">${itNo && itNo.sitesSansIT ? itNo.sitesSansIT.length : "e"
+                }</span>
+              </div>
+            </div>
+
+            <div class="kpi">
+              <div class="label">Finance (metier)</div>
+              <div class="caption" style="margin-top:10px">
+                e Responsable + km: <span class="mono">${state.finTopKm && state.finTopKm.responsable ? state.finTopKm.responsable : "e"
+                }</span><br/>
+                e Drone le plus ancien: <span class="mono">${state.finOldDrone && (state.finOldDrone.droneId || state.finOldDrone.premiereMiseEnService)
+                    ? `${state.finOldDrone.droneId || "Drone"} @ ${state.finOldDrone.premiereMiseEnService || "e"}`
+                    : "e"
+                }</span>
+              </div>
+            </div>
+          `;
+        }
+
+        function renderTab(tab) {
+            const map = {
+                summary: () => renderSummary(),
+                personnel: () => renderTable(state.raw.personnel.filter(x => sitePass(x.__site))),
+                operations: () => renderTable(state.raw.operations.filter(x => sitePass(x.__site))),
+                formations: () => renderTable(state.raw.formations.filter(x => sitePass(x.__site))),
+                releves: () => renderTable(state.raw.releves.filter(x => sitePass(x.__site))),
+                articles: () => renderTable(state.raw.articles.filter(x => sitePass(x.__site))),
+                surveillance: () => renderTable(state.raw.surveillance.filter(x => sitePass(x.__site))),
+            };
+            $("tabContent").innerHTML = map[tab] ? map[tab]() : renderSummary();
+        }
+
+        function renderAll() {
+            setRoleUI();
+            updateKPIs();
+            buildCharts();
+
+            // active tab render
+            const active = document.querySelector(".tab.active");
+            renderTab(active ? active.dataset.tab : "summary");
+        }
+
+        // ====== EVENTS ======
+        document.querySelectorAll(".tab").forEach(t => {
+            t.addEventListener("click", () => {
+                document.querySelectorAll(".tab").forEach(x => x.classList.remove("active"));
+                t.classList.add("active");
+                renderTab(t.dataset.tab);
+            });
+        });
+
+        $("btnReload").addEventListener("click", reloadAll);
+
+        $("role").addEventListener("change", (e) => {
+            state.role = e.target.value;
+            renderAll();
+            toast("Vue changee", `Mode: ${state.role}`);
+        });
+
+        $("filterSite").addEventListener("change", (e) => {
+            state.filterSite = e.target.value;
+            renderAll();
+            toast("Filtre site", state.filterSite === "all" ? "Tous les sites" : state.filterSite);
+        });
+
+        $("q").addEventListener("input", (e) => {
+            state.q = e.target.value;
+            const active = document.querySelector(".tab.active");
+            renderTab(active ? active.dataset.tab : "summary");
+        });
+
+        $("refresh").addEventListener("change", (e) => {
+            const sec = Number(e.target.value);
+            if (state.timers.auto) clearInterval(state.timers.auto);
+            state.timers.auto = null;
+            if (sec > 0) {
+                state.timers.auto = setInterval(reloadAll, sec * 1000);
+                toast("Auto-refresh", `Toutes les ${sec}s`);
+            } else {
+                toast("Auto-refresh", "Desactive");
+            }
+        });
+
+        // ====== BOOT ======
+        (async function boot() {
+            setFetchStatus("warn", "Initialisatione");
+            await reloadAll();
+        })();
+    </script>
+</body>
+</html>
