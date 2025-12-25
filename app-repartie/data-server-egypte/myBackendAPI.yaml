@@ -1,0 +1,100 @@
+openapi: 3.0.0
+info:
+  title: Data-server Égypte API
+  description: API REST du serveur Égypte déployé sur Render (groupe Violet)
+  version: 1.0.0
+
+servers:
+  - url: https://projet-application-r-parties.onrender.com
+
+paths:
+
+  /personnel:
+    get:
+      summary: Récupérer la liste du personnel
+      responses:
+        '200':
+          description: Liste du personnel
+    post:
+      summary: Ajouter un personnel
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '201':
+          description: Personnel ajouté
+
+  /operations:
+    get:
+      summary: Récupérer la liste des opérations
+      responses:
+        '200':
+          description: Liste des opérations
+    post:
+      summary: Ajouter une opération
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '201':
+          description: Opération ajoutée
+
+  /formations:
+    get:
+      summary: Récupérer la liste des formations
+      responses:
+        '200':
+          description: Liste des formations
+    post:
+      summary: Ajouter une formation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '201':
+          description: Formation ajoutée
+
+  /releves:
+    get:
+      summary: Récupérer les relevés sanitaires
+      responses:
+        '200':
+          description: Liste des relevés
+    post:
+      summary: Ajouter un relevé sanitaire
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '201':
+          description: Relevé ajouté
+
+  /articles:
+    get:
+      summary: Récupérer les articles
+      responses:
+        '200':
+          description: Liste des articles
+    post:
+      summary: Ajouter un article
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '201':
+          description: Article ajouté
