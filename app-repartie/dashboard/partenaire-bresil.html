@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Backend partenaire Bresil</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: system-ui, Arial, sans-serif;
+            background: #0b1020;
+            color: #eaf0ff;
+            padding: 30px;
+        }
+
+        h1 {
+            margin-top: 0;
+        }
+
+        .card {
+            background: #11183a;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        button {
+            padding: 10px 14px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            background: #63a7ff;
+            color: #000;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 12px;
+            font-size: 13px;
+        }
+
+        th, td {
+            border-bottom: 1px solid rgba(255,255,255,.15);
+            padding: 8px 10px;
+            text-align: left;
+        }
+
+        th {
+            background: rgba(255,255,255,.08);
+        }
+
+        tr:hover td {
+            background: rgba(99,167,255,.08);
+        }
+
+        ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Backend partenaire  Groupe Bresil</h1>
+    <p>
+        Cette page consomme directement le backend deploye par le groupe Bresil (Render)
+        et affiche les donnees sous forme de tableaux.
+    </p>
+
+    <div class="card">
+        <h2>Personnel</h2>
+        <button onclick="loadPersonnel()">Charger</button>
+        <div id="personnel"></div>
+    </div>
+
+    <div class="card">
+        <h2>Formations</h2>
+        <button onclick="loadFormations()">Charger</button>
+        <div id="formations"></div>
+    </div>
+
+    <div class="card">
+        <h2>Articles</h2>
+        <button onclick="loadArticles()">Charger</button>
+        <div id="articles"></div>
+    </div>
+
+    <div class="card">
+        <h2>Tables disponibles</h2>
+        <button onclick="loadTables()">Charger</button>
+        <div id="tables"></div>
+    </div>
+
+    <script>
+        const BASE = "https://projet-app-rep.onrender.com";
+
+        function renderTable(data) {
+            if (!Array.isArray(data) || data.length === 0) {
+                return "<p>Aucune donnée</p>";
+            }
+
+            const cols = Object.keys(data[0]);
+            let html = "<table><thead><tr>";
+
+            cols.forEach(c => html += `<th>${c}</th>`);
+            html += "</tr></thead><tbody>";
+
+            data.forEach(row => {
+                html += "<tr>";
+                cols.forEach(c => html += `<td>${row[c]}</td>`);
+                html += "</tr>";
+            });
+
+            html += "</tbody></table>";
+            return html;
+        }
+
+        async function loadPersonnel() {
+            const div = document.getElementById("personnel");
+            div.textContent = "Chargement…";
+            const res = await fetch(`${BASE}/general/personnel`);
+            const data = await res.json();
+            div.innerHTML = renderTable(data);
+        }
+
+        async function loadFormations() {
+            const div = document.getElementById("formations");
+            div.textContent = "Chargement…";
+            const res = await fetch(`${BASE}/general/formations`);
+            const data = await res.json();
+            div.innerHTML = renderTable(data);
+        }
+
+        async function loadArticles() {
+            const div = document.getElementById("articles");
+            div.textContent = "Chargement…";
+            const res = await fetch(`${BASE}/general/articles`);
+            const data = await res.json();
+            div.innerHTML = renderTable(data);
+        }
+
+        async function loadTables() {
+            const div = document.getElementById("tables");
+            div.textContent = "Chargement…";
+            const res = await fetch(`${BASE}/general/tables`);
+            const data = await res.json();
+
+            if (data.tables) {
+                div.innerHTML = "<ul>" + data.tables.map(t => `<li>${t}</li>`).join("") + "</ul>";
+            } else {
+                div.innerHTML = "<pre>" + JSON.stringify(data, null, 2) + "</pre>";
+            }
+        }
+    </script>
+
+</body>
+</html>

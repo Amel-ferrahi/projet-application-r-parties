@@ -531,6 +531,53 @@
         </header>
 
         <div class="grid">
+            <section class="card" style="margin-top:20px;">
+                <div class="cardHeader">
+                    <div>
+                        <h2>Backends partenaires</h2>
+                        <div class="subtitle">
+                            Accès aux services déployés par les autres groupes (application répartie).
+                        </div>
+                    </div>
+                </div>
+
+                <div class="cardBody">
+                    <div class="chip" style="margin-bottom:12px;">
+                        <span class="dot ok"></span>
+                        <span>Groupe Brésil – Ludmila</span>
+                    </div>
+
+                    <p style="color:var(--muted); font-size:13px;">
+                        Backend déployé sur Render. Les endpoints sont documentés via OpenAPI.
+                    </p>
+
+                    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;">
+                        <a href="https://projet-app-rep.onrender.com/general/personnel"
+                           target="_blank">
+                            <button>Personnel</button>
+                        </a>
+
+                        <a href="https://projet-app-rep.onrender.com/general/operations"
+                           target="_blank">
+                            <button>Opérations</button>
+                        </a>
+
+                        <a href="https://projet-app-rep.onrender.com/general/formations"
+                           target="_blank">
+                            <button>Formations</button>
+                        </a>
+
+                        <a href="https://github.com/LudmilaAmriou/projet_APP_REP/blob/master/myBackendAPI.yaml"
+                           target="_blank">
+                            <button class="primary">Documentation API</button>
+                        </a>
+                    </div>
+                </div>
+            </section>
+            <a href="partenaire-bresil.html" target="_blank">
+                <button class="primary">Voir données Brésil</button>
+            </a>
+
             <!-- LEFT: KPI + CHARTS -->
             <section class="card" id="panelMain">
                 <div class="cardHeader">
@@ -963,16 +1010,16 @@
                 }</tbody>`;
 
             return `
-            <div class="tableWrap">
-              <table>
-                ${thead}
-                ${tbody}
-              </table>
-            </div>
-            <div style="margin-top:10px; color:var(--muted2); font-size:12px;">
-              <span class="mono">${rows.length}</span> lignes affichees (max 200). Utilise la recherche pour filtrer.
-            </div>
-          `;
+                <div class="tableWrap">
+                  <table>
+                    ${thead}
+                    ${tbody}
+                  </table>
+                </div>
+                <div style="margin-top:10px; color:var(--muted2); font-size:12px;">
+                  <span class="mono">${rows.length}</span> lignes affichees (max 200). Utilise la recherche pour filtrer.
+                </div>
+              `;
         }
 
         function renderSummary() {
@@ -987,37 +1034,37 @@
             const itNo = state.itNoIT;
 
             return `
-            <div class="kpi" style="margin-bottom:12px">
-              <div class="label">Captions (preuve niveau 3)</div>
-              <div class="caption" style="margin-top:10px">
-                e Sites charges: <span class="mono">${DATA_SITES.length}</span> e Filtre: <span class="mono">${state.filterSite}</span><br/>
-                e Personnel: <span class="mono">${p.length}</span> e Ops: <span class="mono">${o.length}</span> e Formations: <span class="mono">${f.length}</span><br/>
-                e Releves: <span class="mono">${r.length}</span> e Articles: <span class="mono">${a.length}</span> e Surveillance: <span class="mono">${s.length}</span>
-              </div>
-            </div>
+                <div class="kpi" style="margin-bottom:12px">
+                  <div class="label">Captions (preuve niveau 3)</div>
+                  <div class="caption" style="margin-top:10px">
+                    e Sites charges: <span class="mono">${DATA_SITES.length}</span> e Filtre: <span class="mono">${state.filterSite}</span><br/>
+                    e Personnel: <span class="mono">${p.length}</span> e Ops: <span class="mono">${o.length}</span> e Formations: <span class="mono">${f.length}</span><br/>
+                    e Releves: <span class="mono">${r.length}</span> e Articles: <span class="mono">${a.length}</span> e Surveillance: <span class="mono">${s.length}</span>
+                  </div>
+                </div>
 
-            <div class="kpi" style="margin-bottom:12px">
-              <div class="label">Informatique (metier)</div>
-              <div class="caption" style="margin-top:10px">
-                e Formation IT (engagement min): <span class="mono">${itMin && (itMin.nomFormation || itMin.intitule) ? (itMin.nomFormation || itMin.intitule) : "e"
+                <div class="kpi" style="margin-bottom:12px">
+                  <div class="label">Informatique (metier)</div>
+                  <div class="caption" style="margin-top:10px">
+                    e Formation IT (engagement min): <span class="mono">${itMin && (itMin.nomFormation || itMin.intitule) ? (itMin.nomFormation || itMin.intitule) : "e"
                 }</span><br/>
-                e Sites sans personnel IT: <span class="mono">${itNo && itNo.sitesSansIT ? itNo.sitesSansIT.length : "e"
+                    e Sites sans personnel IT: <span class="mono">${itNo && itNo.sitesSansIT ? itNo.sitesSansIT.length : "e"
                 }</span>
-              </div>
-            </div>
+                  </div>
+                </div>
 
-            <div class="kpi">
-              <div class="label">Finance (metier)</div>
-              <div class="caption" style="margin-top:10px">
-                e Responsable + km: <span class="mono">${state.finTopKm && state.finTopKm.responsable ? state.finTopKm.responsable : "e"
+                <div class="kpi">
+                  <div class="label">Finance (metier)</div>
+                  <div class="caption" style="margin-top:10px">
+                    e Responsable + km: <span class="mono">${state.finTopKm && state.finTopKm.responsable ? state.finTopKm.responsable : "e"
                 }</span><br/>
-                e Drone le plus ancien: <span class="mono">${state.finOldDrone && (state.finOldDrone.droneId || state.finOldDrone.premiereMiseEnService)
+                    e Drone le plus ancien: <span class="mono">${state.finOldDrone && (state.finOldDrone.droneId || state.finOldDrone.premiereMiseEnService)
                     ? `${state.finOldDrone.droneId || "Drone"} @ ${state.finOldDrone.premiereMiseEnService || "e"}`
                     : "e"
                 }</span>
-              </div>
-            </div>
-          `;
+                  </div>
+                </div>
+              `;
         }
 
         function renderTab(tab) {
