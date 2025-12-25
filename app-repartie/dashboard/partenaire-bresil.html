@@ -66,10 +66,30 @@
 <body>
 
     <h1>Backend partenaire  Groupe Bresil</h1>
+    <div class="card">
+        <h2>Indicateur B – Effectif total (Backend Brésil)</h2>
+        <p id="bEffectif" style="font-size:24px; font-weight:700;">
+            –
+        </p>
+        <p style="color:#9aa4d6; font-size:13px;">
+            Calculé dynamiquement à partir des données du backend partenaire.
+        </p>
+    </div>
+
     <p>
         Cette page consomme directement le backend deploye par le groupe Bresil (Render)
         et affiche les donnees sous forme de tableaux.
     </p>
+    <div class="card">
+        <h2>Indicateur B – Effectif total (Backend Brésil)</h2>
+        <p style="font-size:22px; font-weight:700;" id="bEffectif">
+            –
+        </p>
+        <p style="color:#9aa4d6; font-size:13px;">
+            Calculé dynamiquement à partir des données du backend partenaire.
+        </p>
+    </div>
+
 
     <div class="card">
         <h2>Personnel</h2>
@@ -100,7 +120,7 @@
 
         function renderTable(data) {
             if (!Array.isArray(data) || data.length === 0) {
-                return "<p>Aucune donn�e</p>";
+                return "<p>Aucune donn�e</p>";
             }
 
             const cols = Object.keys(data[0]);
@@ -121,15 +141,31 @@
 
         async function loadPersonnel() {
             const div = document.getElementById("personnel");
-            div.textContent = "Chargement�";
-            const res = await fetch(`${BASE}/general/personnel`);
-            const data = await res.json();
-            div.innerHTML = renderTable(data);
+            const indicator = document.getElementById("bEffectif");
+
+            div.textContent = "Chargement des données…";
+            indicator.textContent = "Calcul en cours…";
+
+            try {
+                const res = await fetch(`${BASE}/general/personnel`);
+                const data = await res.json();
+
+                // Affichage tableau
+                div.innerHTML = renderTable(data);
+
+                // 🔹 Indicateur B : effectif total
+                indicator.textContent = data.length + " employés";
+
+            } catch (e) {
+                div.textContent = "Erreur de chargement";
+                indicator.textContent = "Erreur";
+            }
         }
+
 
         async function loadFormations() {
             const div = document.getElementById("formations");
-            div.textContent = "Chargement�";
+            div.textContent = "Chargement�";
             const res = await fetch(`${BASE}/general/formations`);
             const data = await res.json();
             div.innerHTML = renderTable(data);
@@ -137,7 +173,7 @@
 
         async function loadArticles() {
             const div = document.getElementById("articles");
-            div.textContent = "Chargement�";
+            div.textContent = "Chargement�";
             const res = await fetch(`${BASE}/general/articles`);
             const data = await res.json();
             div.innerHTML = renderTable(data);
@@ -145,7 +181,7 @@
 
         async function loadTables() {
             const div = document.getElementById("tables");
-            div.textContent = "Chargement�";
+            div.textContent = "Chargement�";
             const res = await fetch(`${BASE}/general/tables`);
             const data = await res.json();
 
