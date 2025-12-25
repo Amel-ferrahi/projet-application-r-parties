@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Backend partenaire Bresil</title>
+    <title>Backend partenaire Brésil</title>
 
     <style>
         body {
@@ -65,50 +65,46 @@
 
 <body>
 
-    <h1>Backend partenaire  Groupe Bresil</h1>
+    <h1>Backend partenaire – Groupe Brésil</h1>
+
+    <!-- ================= INDICATEUR B ================= -->
     <div class="card">
         <h2>Indicateur B – Effectif total (Backend Brésil)</h2>
-        <p id="bEffectif" style="font-size:24px; font-weight:700;">
+        <p id="bEffectif" style="font-size:26px; font-weight:700;">
             –
         </p>
         <p style="color:#9aa4d6; font-size:13px;">
-            Calculé dynamiquement à partir des données du backend partenaire.
+            Calculé automatiquement à partir des données du backend partenaire.
         </p>
     </div>
 
     <p>
-        Cette page consomme directement le backend deploye par le groupe Bresil (Render)
-        et affiche les donnees sous forme de tableaux.
+        Cette page consomme directement le backend déployé par le groupe Brésil (Render)
+        et affiche les données retournées sous forme de tableaux.
     </p>
-    <div class="card">
-        <h2>Indicateur B – Effectif total (Backend Brésil)</h2>
-        <p style="font-size:22px; font-weight:700;" id="bEffectif">
-            –
-        </p>
-        <p style="color:#9aa4d6; font-size:13px;">
-            Calculé dynamiquement à partir des données du backend partenaire.
-        </p>
-    </div>
 
-
+    <!-- ================= PERSONNEL ================= -->
     <div class="card">
         <h2>Personnel</h2>
         <button onclick="loadPersonnel()">Charger</button>
         <div id="personnel"></div>
     </div>
 
+    <!-- ================= FORMATIONS ================= -->
     <div class="card">
         <h2>Formations</h2>
         <button onclick="loadFormations()">Charger</button>
         <div id="formations"></div>
     </div>
 
+    <!-- ================= ARTICLES ================= -->
     <div class="card">
         <h2>Articles</h2>
         <button onclick="loadArticles()">Charger</button>
         <div id="articles"></div>
     </div>
 
+    <!-- ================= TABLES ================= -->
     <div class="card">
         <h2>Tables disponibles</h2>
         <button onclick="loadTables()">Charger</button>
@@ -118,9 +114,10 @@
     <script>
         const BASE = "https://projet-app-rep.onrender.com";
 
+        // --------- UTILITAIRE TABLE ---------
         function renderTable(data) {
             if (!Array.isArray(data) || data.length === 0) {
-                return "<p>Aucune donn�e</p>";
+                return "<p>Aucune donnée</p>";
             }
 
             const cols = Object.keys(data[0]);
@@ -139,33 +136,38 @@
             return html;
         }
 
-        async function loadPersonnel() {
-            const div = document.getElementById("personnel");
+        // --------- INDICATEUR B (AUTO) ---------
+        async function loadIndicatorB() {
             const indicator = document.getElementById("bEffectif");
-
-            div.textContent = "Chargement des données…";
             indicator.textContent = "Calcul en cours…";
 
             try {
                 const res = await fetch(`${BASE}/general/personnel`);
                 const data = await res.json();
-
-                // Affichage tableau
-                div.innerHTML = renderTable(data);
-
-                // 🔹 Indicateur B : effectif total
                 indicator.textContent = data.length + " employés";
-
             } catch (e) {
-                div.textContent = "Erreur de chargement";
                 indicator.textContent = "Erreur";
             }
         }
 
+        // --------- TABLES ---------
+        async function loadPersonnel() {
+            const div = document.getElementById("personnel");
+            div.textContent = "Chargement…";
+
+            try {
+                const res = await fetch(`${BASE}/general/personnel`);
+                const data = await res.json();
+                div.innerHTML = renderTable(data);
+            } catch {
+                div.textContent = "Erreur de chargement";
+            }
+        }
 
         async function loadFormations() {
             const div = document.getElementById("formations");
-            div.textContent = "Chargement�";
+            div.textContent = "Chargement…";
+
             const res = await fetch(`${BASE}/general/formations`);
             const data = await res.json();
             div.innerHTML = renderTable(data);
@@ -173,7 +175,8 @@
 
         async function loadArticles() {
             const div = document.getElementById("articles");
-            div.textContent = "Chargement�";
+            div.textContent = "Chargement…";
+
             const res = await fetch(`${BASE}/general/articles`);
             const data = await res.json();
             div.innerHTML = renderTable(data);
@@ -181,16 +184,21 @@
 
         async function loadTables() {
             const div = document.getElementById("tables");
-            div.textContent = "Chargement�";
+            div.textContent = "Chargement…";
+
             const res = await fetch(`${BASE}/general/tables`);
             const data = await res.json();
 
             if (data.tables) {
-                div.innerHTML = "<ul>" + data.tables.map(t => `<li>${t}</li>`).join("") + "</ul>";
+                div.innerHTML =
+                    "<ul>" + data.tables.map(t => `<li>${t}</li>`).join("") + "</ul>";
             } else {
                 div.innerHTML = "<pre>" + JSON.stringify(data, null, 2) + "</pre>";
             }
         }
+
+        // --------- AUTO AU CHARGEMENT ---------
+        window.addEventListener("load", loadIndicatorB);
     </script>
 
 </body>
